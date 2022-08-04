@@ -69,7 +69,7 @@
     when: ansible_swaptotal_mb > 0
 
   - name: Settings to load overlay & br_netfilter module during boot
-    shell: printf "overlayx\nbr_netfilter" > /etc/modules-load.d/k8s.conf
+    shell: printf "overlay\nbr_netfilter" > /etc/modules-load.d/k8s.conf
     
   - name: Load overlay & br_netfilter module
     shell: modprobe overlay && modprobe br_netfilter 
