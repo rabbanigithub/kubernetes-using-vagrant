@@ -53,13 +53,10 @@
     copy:
       src: cri-dockerd.sh
       dest: /tmp/cri-dockerd.sh
+      mode: 0777
  
   - name: Install cri-dockerd
-    shell: |
-      cd /tmp
-      chmod + cri-dockerd.sh
-      ./cri-dockerd.sh
-      exit 0
+    shell: sh /tmp/cri-dockerd.sh
 
   - name: Add vagrant user to docker group
     user:
