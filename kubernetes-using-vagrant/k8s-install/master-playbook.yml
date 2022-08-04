@@ -9,12 +9,10 @@
       update_cache: yes
     vars:
       packages:
-      - apt-transport-https
       - ca-certificates
       - curl
       - gnupg
- #     - software-properties-common
- #     - lsb-release
+      - lsb-release
 
   - name: Add an apt signing key for Docker
     apt_key:
@@ -36,6 +34,7 @@
       - docker-ce
       - docker-ce-cli
       - containerd.io
+      - docker-compose-plugin
     notify:
       - docker-status
 
@@ -49,6 +48,18 @@
       name: docker
       daemon_reload: yes
       state: restarted
+
+  - name: Copy cri-dockerd installation script
+    copy:
+      src: cri-dockerd.sh
+      dest: /tmp/cri-dockerd.sh
+ 
+  - name: Install cri-dockerd
+    shell: |
+      cd /tmp
+      chmod + cri-dockerd.sh
+      ./cri-dockerd.sh
+      exit 0
 
   - name: Add vagrant user to docker group
     user:
