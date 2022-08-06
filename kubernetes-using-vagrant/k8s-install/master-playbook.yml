@@ -38,30 +38,25 @@
     notify:
       - docker-status
 
-  - name: Configure the Docker daemon
-    copy:
-      src: daemon.json
-      dest: /etc/docker/daemon.json
+  - name: Install cri-dockerd adapter
+    shell: |
+      wget https://storage.googleapis.com/golang/getgo/installer_linux
+      chmod +x ./installer_linux
+      ./installer_linux
+      source ~/.bash_profile
 
-  - name: Restart Docker service
-    service:
-      name: docker
-      daemon_reload: yes
-      state: restarted
-
-  - name: Copy cri-dockerd installation script
-    copy:
-      src: cri-dockerd.sh
-      dest: /tmp/cri-dockerd.sh
-      mode: 0777
- 
-  - name: Install cri-dockerd
-    shell: sh /tmp/cri-dockerd.sh
-
-  - name: Add vagrant user to docker group
-    user:
-      name: vagrant
-      group: docker
+      git clone https://github.com/Mirantis/cri-dockerd.git
+      cd cri-dockerd
+      mkdir bin
+      go build -o bin/cri-dockerd
+      mkdir -p /usr/local/bin
+      install -o root -g root -m 0755 bin/cri-dockerd /usr/local/bin/cri-dockerd
+      cp -a packaging/systemd/* /etc/systemd/system
+      sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service
+      systemctl daemon-reload
+      systemctl enable cri-docker.service
+      systemctl enable --now cri-docker.socket
+      exit 0
 
   - name: Remove swapfile from /etc/fstab
     mount:
@@ -93,7 +88,7 @@
       url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
       state: present
 
-  - name: Add apt repository for Kubernetes
+ - name: Add apt repository for Kubernetes
     apt_repository:
       repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
       state: present
