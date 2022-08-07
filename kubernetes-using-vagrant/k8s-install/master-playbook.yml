@@ -134,7 +134,7 @@
     register: join_command
 
   - name: Copy join command to local file
-    local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
+    local_action: copy content="{{ join_command.stdout_lines[0] }} --cri-socket /run/cri-dockerd.sock" dest="./join-command"
    
   - name: Install bash-completion package
     apt:
